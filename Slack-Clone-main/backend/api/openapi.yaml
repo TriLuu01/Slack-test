@@ -1,0 +1,376 @@
+#Comments start here
+
+openapi: '3.0.3'
+
+info:
+  description: CSE183 Assignment 8 Backend
+  version: 0.1.0
+  title: CSE183 Assignment 8 Backend
+
+servers:
+  - url: http://localhost:3010/v0
+
+paths:
+  /channels:
+    get:
+      description: Get data from channel
+      responses:
+        200:
+          description: Succesful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllChannels'
+        404:
+          description: Channel not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /channels/{channel}:
+    get:
+      description: Get all messages in Channel
+      parameters:
+      - name: channel
+        in: path
+        description: Name of channel
+        schema:
+          type: string
+        required: true
+      - name: thread
+        in: query
+        description: id of current message
+        schema:
+          type: string
+        required: false
+      responses:
+        200:
+          description: Message Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponseArray'
+        404:
+          description: Channel not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      description: Send New Message
+      parameters:
+      - name: channel
+        in: path
+        description: Name of channel
+        schema:
+          type: string
+        required: true
+      - name: thread
+        in: query
+        schema:
+          type: string
+        required: false
+      requestBody:
+        description: New Message Content
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewMessage'
+      responses:
+        201:
+          description: Message Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        400:
+          description: Thread not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /user:
+    get:
+      description: get info of user
+      parameters:
+        - name: username
+          in: query
+          description: username of user
+          schema:
+            type: string
+          required: false
+      responses:
+        200:
+          description: Succesful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserArray'
+        404:
+          description: Channel not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /workspaces:
+    get:
+      description: get array of channels
+      parameters:
+        - in: query
+          name: code
+          description: code of workspace
+          schema:
+            type: string
+          required: false
+      responses:
+        200:
+          description: Successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceResponse'
+        404:
+          description: Workspace not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /dm/{username}:
+    get:
+      description: Get all messages in Direct Message
+      parameters:
+      - name: username
+        in: path
+        description: username of the recipient
+        schema:
+          type: string
+        required: true
+      - name: thread
+        in: query
+        description: id of current message
+        schema:
+          type: string
+        required: false
+      responses:
+        200:
+          description: DM Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponseArray'
+        404:
+          description: Channel not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      description: Send New Message
+      parameters:
+      - name: username
+        in: path
+        description: Username of the recipient
+        schema:
+          type: string
+        required: true
+      - name: thread
+        in: query
+        schema:
+          type: string
+        required: false
+      requestBody:
+        description: New Message Content
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewMessage'
+      responses:
+        201:
+          description: Message Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        400:
+          description: Thread not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /message:
+    get:
+      description: Get all messages that match given content
+      parameters:
+      - name: content
+        in: query
+        description: Content for lookup
+        schema:
+          type: string
+        required: true
+      responses:
+        200:
+          description: DM Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponseArray'
+        404:
+          description: Channel not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    Error:
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+
+    AllChannels:
+      type: array
+      items:
+        $ref: '#/components/schemas/ChannelResponse'
+
+    ChannelResponse:
+      type: object
+      properties:
+        message:
+          type: array
+          items:
+            $ref: '#/components/schemas/Message'
+
+    MessageResponseArray:
+      type: array
+      items:
+        $ref: '#/components/schemas/Message'
+
+    NewMessage:
+      type: object
+      properties:
+        content:
+          type: string
+
+    Message:
+      type: object
+      properties:
+        id:
+          type: string
+        content:
+          type: string
+        from:
+          type: string
+        to:
+          type: string
+        sent:
+          type: string
+        thread:
+          type: array
+          items:
+            $ref: '#/components/schemas/Thread'
+
+    Thread:
+      type: object
+      properties:
+        content:
+          type: string
+        from:
+          type: string
+        to:
+          type: string
+        sent:
+          type: string
+
+    UserArray:
+      type: array
+      items:
+        $ref: '#/components/schemas/User'
+
+    User:
+      type: object
+      properties:
+        username:
+          type: string
+        name:
+          type: string
+        access:
+          type: array
+
+    WorkspaceResponse:
+      type: array
+      properties:
+        channels:
+          type: object
+
+
+
+
+  securitySchemes:
+    bearerAuth:            # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT    # optional, arbitrary value for documentation purposes
+
+security:
+  - bearerAuth: []         # use the same name as above
